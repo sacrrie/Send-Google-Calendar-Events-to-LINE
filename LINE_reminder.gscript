@@ -1,0 +1,57 @@
+//Initially referenced people's works in here: https://qiita.com/pi_chan/items/6d0f54bd885b218efffe
+//Later modified with my own work and chatGPT.
+
+// Define the function to send a LINE message with event details for today
+function sendTodayEventsToLine() {
+
+  // Set the ID of the calendar to check events for (replace with your own ID)
+  var calendarId = 'replace-with-your-calendar-ID';
+
+  // Set the LINE API access token (replace with your own token)
+  var lineAccessToken = 'replace-with-your-LINE-access-token';
+
+  // Get today's date
+  var today = new Date();
+
+  // Get the start and end of today in UTC time
+  var startOfToday = new Date(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+  var endOfToday = new Date(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + 1);
+
+  // Get the events for today from the calendar
+  var events = CalendarApp.getCalendarById(calendarId).getEvents(startOfToday, endOfToday);
+
+  // If there are no events for today, return
+  if (events.length === 0) {
+    return;
+  }
+
+  // Create the message to send to LINE
+  var message = 'Events for ' + formatDate(today, 'yyyy/MM/dd') + ':\n';
+
+  // Loop through each event and add it to the message
+  for (var i = 0; i < events.length; i++) {
+    var event = events[i];
+    var title = event.getTitle();
+    var start = formatDate(event.getStartTime(), 'HH:mm');
+    var end = formatDate(event.getEndTime(), 'HH:mm');
+    message += start + ' - ' + end + ' ' + title + '\n';
+  }
+
+  // Send the message to LINE using the URL Fetch API
+  UrlFetchApp.fetch('https://notify-api.line.me/api/notify', {
+    'method': 'post',
+    'headers': {
+      'Authorization': 'Bearer ' + lineAccessToken,
+    },
+    'payload': {
+      'message': message,
+      'notificationDisabled': false,
+    },
+  });
+}
+
+// Define a function to format a date as a string
+function formatDate(date, format) {
+  var timeZone = Session.getScriptTimeZone();
+  return Utilities.formatDate(date, timeZone, format);
+}
