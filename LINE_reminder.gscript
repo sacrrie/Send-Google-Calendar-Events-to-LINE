@@ -11,14 +11,14 @@ function sendTodayEventsToLine() {
   var lineAccessToken = 'replace-with-your-LINE-access-token';
 
   // Get today's date
+  // Be aware of the difference between the timezone you desire and the actually timezone for the script trigger.
+  // Use modified UTC timezone (start-time, end-time) to select calendar events as needed
+  
   var today = new Date();
 
-  // Get the start and end of today in UTC time
-  var startOfToday = new Date(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
-  var endOfToday = new Date(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + 1);
 
   // Get the events for today from the calendar
-  var events = CalendarApp.getCalendarById(calendarId).getEvents(startOfToday, endOfToday);
+  var events = CalendarApp.getCalendarById(calendarId).getEventsForDay(today);
 
   // If there are no events for today, return
   if (events.length === 0) {
